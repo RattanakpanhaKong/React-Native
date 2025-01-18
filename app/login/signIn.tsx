@@ -4,12 +4,43 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import Colors from "@/constants/Colors";
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
+import { auth } from "@/configs/firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function SignIn() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onSignInClick = () => {
+    if (!email || !password) {
+      ToastAndroid.show("Please fill all details", ToastAndroid.BOTTOM);
+      return;
+    }
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log("🚀 ~ .then ~ user:", user);
+        router.replace("/(tabs)");
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        if (errorCode == "auth/invalid-credential") {
+          ToastAndroid.show("Invalid email or password", ToastAndroid.BOTTOM);
+        }
+      });
+  };
+
   return (
     <View
       style={{
@@ -26,7 +57,11 @@ export default function SignIn() {
         }}
       >
         <Text>Email</Text>
-        <TextInput placeholder="Email" style={styles.textInput} />
+        <TextInput
+          placeholder="Email"
+          style={styles.textInput}
+          onChangeText={(value) => setEmail(value)}
+        />
       </View>
 
       <View
@@ -39,10 +74,11 @@ export default function SignIn() {
           placeholder="Password"
           secureTextEntry={true}
           style={styles.textInput}
+          onChangeText={(value) => setPassword(value)}
         />
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onSignInClick}>
         <Text
           style={{
             fontSize: 17,

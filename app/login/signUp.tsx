@@ -4,13 +4,51 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import Colors from "@/constants/Colors";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { auth } from "@/configs/firebaseConfig";
 
 export default function SignUp() {
   const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const onCreateAccount = () => {
+    if (!email || !password) {
+      ToastAndroid.show("Please fill all details", ToastAndroid.BOTTOM);
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        console.log("🚀 ~ .then ~ user:", user);
+        router.push("/(tabs)");
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("🚀 ~ onCreateAccount ~ errorCode:", errorCode);
+
+        if (errorCode === "auth/email-already-in-use") {
+          ToastAndroid.show("Email already exists", ToastAndroid.BOTTOM);
+        } else if (errorCode === "auth/invalid-email") {
+          ToastAndroid.show("Invalid email format", ToastAndroid.BOTTOM);
+        } else if (errorCode === "auth/weak-password") {
+          ToastAndroid.show("Password is too weak", ToastAndroid.BOTTOM);
+        } else {
+          ToastAndroid.show("Something went wrong", ToastAndroid.BOTTOM);
+        }
+        // ..
+      });
+  };
   return (
     <View
       style={{
@@ -33,7 +71,11 @@ export default function SignUp() {
         }}
       >
         <Text>Email</Text>
-        <TextInput placeholder="Email" style={styles.textInput} />
+        <TextInput
+          placeholder="Email"
+          style={styles.textInput}
+          onChangeText={(value) => setEmail(value)}
+        />
       </View>
       <View
         style={{
@@ -45,10 +87,11 @@ export default function SignUp() {
           placeholder="Password"
           secureTextEntry={true}
           style={styles.textInput}
+          onChangeText={(value) => setPassword(value)}
         />
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={onCreateAccount}>
         <Text
           style={{
             fontSize: 17,

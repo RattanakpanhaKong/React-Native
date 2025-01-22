@@ -15,6 +15,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/configs/firebaseConfig";
+import { setLocalStorage } from "@/services/LocalStorage";
 
 export default function SignUp() {
   const router = useRouter();
@@ -37,6 +38,8 @@ export default function SignUp() {
         await updateProfile(user, {
           displayName: username,
         });
+
+        await setLocalStorage("userDetail", user);
 
         router.push("/(tabs)");
         // ...

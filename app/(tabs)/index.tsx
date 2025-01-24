@@ -1,29 +1,19 @@
-import { View, Text, Button } from "react-native";
+import { View } from "react-native";
 import React from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "@/configs/firebaseConfig";
-import { getLocalStorage, removeLocalStorage } from "@/services/LocalStorage";
-import { useRouter } from "expo-router";
+import Header from "@/components/Header";
+import EmptyState from "@/components/EmptyState";
 
 export default function HomeScreeen() {
-  const router = useRouter();
-  const handleSignOut = () => {
-    removeLocalStorage();
-    console.log("Success");
-    router.push("/login");
-    getLocalStorage("userDetail");
-  };
   return (
-    <View>
-      <Text>HomeScreeen</Text>
-      <Button
-        title="Logout"
-        onPress={() =>
-          signOut(auth).then(() => {
-            handleSignOut();
-          })
-        }
-      />
+    <View
+      style={{
+        padding: 25,
+        backgroundColor: "white",
+        height: "100%",
+      }}
+    >
+      <Header />
+      <EmptyState />
     </View>
   );
 }
